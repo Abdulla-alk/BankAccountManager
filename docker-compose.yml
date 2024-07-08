@@ -1,0 +1,33 @@
+version: '3.8'
+
+services:
+  postgres-db:
+    image: postgres:latest
+    container_name: postgres
+    environment:
+      POSTGRES_USER: baeldung
+      POSTGRES_PASSWORD: baeldung
+      POSTGRES_DB: account_manager
+    ports:
+      - "5432:5432"
+    networks:
+      - bank-account-network
+
+  bank-account-api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: bank-account-api
+    ports:
+      - "8080:8080"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/account_manager
+      SPRING_DATASOURCE_USERNAME: baeldung
+      SPRING_DATASOURCE_PASSWORD: baeldung
+    depends_on:
+      - postgres-db
+    networks:
+      - bank-account-network
+
+networks:
+  bank-account-network:

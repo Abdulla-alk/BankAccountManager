@@ -1,0 +1,15 @@
+README.md
+pom.xml
+src/main/java/com/example/api/AccountApi.java
+src/main/java/com/example/api/ApiUtil.java
+src/main/java/com/example/api/CustomerApi.java
+src/main/java/com/example/api/StatusApi.java
+src/main/java/com/example/api/TransactionApi.java
+src/main/java/com/example/api/TypeApi.java
+src/main/java/com/example/model/Account.java
+src/main/java/com/example/model/AccountStatus.java
+src/main/java/com/example/model/AccountTransaction.java
+src/main/java/com/example/model/AccountType.java
+src/main/java/com/example/model/Customer.java
+src/main/java/com/example/model/CustomerStatus.java
+src/main/java/com/example/model/InlineResponse500.java
