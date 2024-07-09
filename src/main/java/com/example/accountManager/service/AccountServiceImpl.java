@@ -50,6 +50,7 @@ public class AccountServiceImpl implements AccountService {
         if (account != null) {
             account.setAccountNumber(accountDetails.getAccountNumber());
             account.setCustomer(accountDetails.getCustomer());
+            account.setStatus(accountDetails.getStatus());
             accountRepository.save(account);
             return account;
         }

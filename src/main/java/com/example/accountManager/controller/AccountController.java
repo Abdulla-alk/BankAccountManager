@@ -1,5 +1,7 @@
 package com.example.accountManager.controller;
 
+import com.example.accountManager.service.AccountStatusService;
+import com.example.accountManager.service.CustomerStatusService;
 import com.example.accountManager.util.AmountRequest;
 import com.example.accountManager.entity.Account;
 import com.example.accountManager.service.AccountService;
@@ -27,6 +29,13 @@ public class AccountController {
 
     @Autowired
     private SqsService sqsService;
+
+    @Autowired
+    private AccountStatusService accountStatusService;
+
+    @Autowired
+    private CustomerStatusService customerStatusService;
+
 
     @PostMapping
     public ResponseEntity<Account> createAccount(@RequestBody Account account) {
@@ -88,11 +97,25 @@ public class AccountController {
         }
         // Get current balance
         BigDecimal currentBalance = accountService.getBalance(accountId);
+        //System.out.println(account.getStatus().getStatusName().toString());
+        if(!account.getStatus().getStatusName().toString().equals("OPEN")){
+            return new ResponseEntity<>("account is not open", HttpStatus.BAD_REQUEST);
+        }
+
+        Customer customer = account.getCustomer();
+
+        if(!customer.getStatus().getStatusName().toString().equals("ACTIVE")){
+            return new ResponseEntity<>("Customer status is not active", HttpStatus.BAD_REQUEST);
+        }
 
         // Check if withdrawal amount is greater than the current balance
         if (currentBalance.compareTo(amount) < 0) {
             return new ResponseEntity<>("Insufficient balance", HttpStatus.BAD_REQUEST);
         }
+
+
+
+
 
         // Proceed with the withdrawal
         AccountTransaction transaction = new AccountTransaction();
@@ -101,13 +124,10 @@ public class AccountController {
         transaction.setAmount(amount);
         transaction.setTransactionDate(LocalDateTime.now());
         transaction.setDescription("Withdrawal of amount: " + amount);
-
         accountService.saveTransaction(transaction);
-
         String message = String.format("{\"requestId\": \"%s\", \"request\": \"%s\", \"response\": \"%s\"}",
                 requestId, "withdraw from account "+accountId, transaction.toString());
         sqsService.sendMessage(message);
-
         return new ResponseEntity<>(transaction.toString(), HttpStatus.OK);
     }
 
@@ -119,6 +139,14 @@ public class AccountController {
 
         if (account == null) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+        if(!account.getStatus().getStatusName().toString().equals("OPEN")){
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+        Customer customer = account.getCustomer();
+
+        if(!customer.getStatus().getStatusName().toString().equals("ACTIVE")){
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
 
         AccountTransaction transaction = new AccountTransaction();
