@@ -79,10 +79,8 @@ public class AccountController {
     public ResponseEntity<Void> deleteAccount(@PathVariable Long id) {
         String requestId = UUID.randomUUID().toString();
         accountService.deleteAccount(id);
-        // Create message
         String message = String.format("{\"requestId\": \"%s\", \"request\": \"%s\", \"response\": \"%s\"}",
                 requestId, "delete account "+id, "Deleted");
-        // Send message to SQS
         sqsService.sendMessage(message);
 
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
@@ -95,9 +93,8 @@ public class AccountController {
         if (account == null) {
             return new ResponseEntity<>("Account not found", HttpStatus.NOT_FOUND);
         }
-        // Get current balance
+
         BigDecimal currentBalance = accountService.getBalance(accountId);
-        //System.out.println(account.getStatus().getStatusName().toString());
         if(!account.getStatus().getStatusName().toString().equals("OPEN")){
             return new ResponseEntity<>("account is not open", HttpStatus.BAD_REQUEST);
         }
@@ -108,16 +105,10 @@ public class AccountController {
             return new ResponseEntity<>("Customer status is not active", HttpStatus.BAD_REQUEST);
         }
 
-        // Check if withdrawal amount is greater than the current balance
         if (currentBalance.compareTo(amount) < 0) {
             return new ResponseEntity<>("Insufficient balance", HttpStatus.BAD_REQUEST);
         }
 
-
-
-
-
-        // Proceed with the withdrawal
         AccountTransaction transaction = new AccountTransaction();
         transaction.setAccount(account);
         transaction.setTransactionType(TransactionType.WITHDRAW);
@@ -136,7 +127,6 @@ public class AccountController {
     public ResponseEntity<AccountTransaction> topUp(@PathVariable Long accountId, @RequestBody BigDecimal amount) {
         String requestId = UUID.randomUUID().toString();
         Account account = accountService.getAccountById(accountId);
-
         if (account == null) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }

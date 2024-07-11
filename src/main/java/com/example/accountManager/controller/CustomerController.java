@@ -27,10 +27,8 @@ public class CustomerController {
     public ResponseEntity<Customer> createCustomer(@RequestBody Customer customer) {
         String requestId = UUID.randomUUID().toString();
         Customer createdCustomer = customerService.createCustomer(customer);
-
         String message = String.format("{\"requestId\": \"%s\", \"request\": \"%s\", \"response\": \"%s\"}",
                 requestId, "Create "+customer.toString(), createdCustomer.toString());
-
         sqsService.sendMessage(message);
         return new ResponseEntity<>(createdCustomer, HttpStatus.CREATED);
     }
